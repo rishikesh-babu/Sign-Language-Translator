@@ -1,22 +1,18 @@
 
 export function setupControls(camera, domElement, avatarSceneRef) {
 
-  
   let isDragging   = false;
   let lastX        = 0;
-  let rotationY    = 0;        // current Y rotation of the avatar (radians)
-  let velocity     = 0;        // momentum (radians/frame)
+  let rotationY    = 0;
+  let velocity     = 0;
+  const SENSITIVITY = 0.005;
+  const DAMPING     = 0.88;
 
-  const SENSITIVITY = 0.005;  // radians per pixel
-  const DAMPING     = 0.88;   // momentum decay per frame (0 = instant stop, 1 = no stop)
-
-  // ── Apply rotation to avatar root ───────────────────────────────────────
   function applyRotation() {
-    const avatar = avatarSceneRef();   // getter — may be null before load
+    const avatar = avatarSceneRef();
     if (avatar) avatar.rotation.y = rotationY;
   }
 
-  // ── Mouse ────────────────────────────────────────────────────────────────
   function onMouseDown(e) {
     isDragging = true;
     lastX      = e.clientX;
@@ -34,7 +30,6 @@ export function setupControls(camera, domElement, avatarSceneRef) {
 
   function onMouseUp() { isDragging = false; }
 
-  // ── Touch ────────────────────────────────────────────────────────────────
   let lastTouchX = 0;
 
   function onTouchStart(e) {
@@ -56,7 +51,6 @@ export function setupControls(camera, domElement, avatarSceneRef) {
 
   function onTouchEnd() { isDragging = false; }
 
-  // Block right-click menu
   function onContextMenu(e) { e.preventDefault(); }
 
   domElement.addEventListener("mousedown",   onMouseDown);

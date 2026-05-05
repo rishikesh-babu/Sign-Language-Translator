@@ -10,11 +10,12 @@ export default function Avatar() {
   const [loaded, setLoaded] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [start, setStart] = useState(false);
-  const [aslMode, setAslMode] = useState(true);
+  const [aslMode, setAslMode] = useState(false);
   const [currentPlaying, setCurrentPlaying] = useState("");
 
   const recognitionRef = useRef(null);
   const isPlayingRef = useRef(false);
+  const isRecognitionActiveRef = useRef(false);
 
   const [loadProgress, setLoadProgress] = useState(0);
 
@@ -39,6 +40,8 @@ export default function Avatar() {
 
   const playText = async (text) => {
     if (!apiRef.current || isPlayingRef.current) return;
+
+    apiRef.current.clearQueue?.();
 
     isPlayingRef.current = true;
 
@@ -76,19 +79,20 @@ export default function Avatar() {
           break;
         }
       }
-
+      
+      setCurrentPlaying(playingText.toUpperCase());
       if (!matched) {
         // Character spelling
         for (const ch of word) {
           if (ch === "z" || ch === "j") {
             apiRef.current.playWord(ch);
+            await apiRef.current.waitForQueue(); 
           } else {
             apiRef.current.playSign(ch);
           }
         }
       }
 
-      setCurrentPlaying(playingText.toUpperCase());
 
       // Wait for animation queue
       await apiRef.current.waitForQueue?.();
@@ -123,7 +127,12 @@ export default function Avatar() {
       playText(transcript);
     };
 
+    recognition.onstart = () => {
+      isRecognitionActiveRef.current = true;
+    };
+
     recognition.onend = () => {
+      isRecognitionActiveRef.current = false;
       setTimeout(() => {
         setStart(false);
       }, 2000);
@@ -134,11 +143,14 @@ export default function Avatar() {
     const recognition = recognitionRef.current;
     if (!recognition) return;
 
-    if (start) recognition.start();
-    else recognition.stop();
+    if (start) {
+      if (!isRecognitionActiveRef.current) recognition.start();
+    } else {
+      if (isRecognitionActiveRef.current) recognition.stop();
+    }
 
     return () => {
-      recognition.stop();
+      if (isRecognitionActiveRef.current) recognition.stop();
     };
   }, [start]);
 

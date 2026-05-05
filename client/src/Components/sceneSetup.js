@@ -1,7 +1,6 @@
 import * as THREE from "three";
 
-export const LOOK_AT = new THREE.Vector3(0, 1.45, 0);
-
+export const LOOK_AT = new THREE.Vector3(0, 1.90, 0);
 const CAM_Y = 2.05;
 
 function computeCameraParams(width, height) {

@@ -7,9 +7,9 @@ import { updatePhysics, updateIdleDrift } from "../Components/physics";
 import { createBoneProxy, runASLSign } from "../Components/aslProxy";
 import { wordMap } from "../Components/wordMap";
 
-const SIGN_HOLD_MS   = 800;
+const SIGN_HOLD_MS   = 1200;
 const WORD_PAUSE_MS  = 400; 
-const WORD_ANIM_MS   = 1300;
+const WORD_ANIM_MS   = 1200;
 
 const animationFiles = [
   "hello", "thanks", "iamfrom", "father", "mother",
@@ -268,7 +268,7 @@ export function initAvatar(mountEl, onLoaded, onProgress) {
     waitForQueue() {
       return new Promise(resolve => {
         const check = () => {
-          if (signQueue.length === 0 && currentSign === null) {
+          if (signQueue.length === 0 && currentSign === null && !isWordPlaying) {
             resolve();
           } else {
             requestAnimationFrame(check);
@@ -276,6 +276,13 @@ export function initAvatar(mountEl, onLoaded, onProgress) {
         };
         requestAnimationFrame(check);
       });
+    },
+
+    clearQueue() {
+      signQueue.length = 0;
+      currentSign = null;
+      isWordPlaying = false;
+      mixer?.stopAllAction();
     },
 
     dispose() {
